@@ -4,13 +4,9 @@ const { Client, LocalAuth } = pkg;
 
 import express from "express";
 import router from "./routes/notification.route.js";
+
 const app = express();
-
 app.use(express.json());
-
-app.use("", router);
-
-app.listen(4000);
 
 const client = new Client({
   authStrategy: new LocalAuth({
@@ -27,28 +23,22 @@ client.on("qr", (qr) => {
   qrcode.generate(qr, { small: true });
 });
 
-client.on("ready", () => {
-  console.log("Cliente logueado");
+// client.on("ready", () => {
+//   console.log("Cliente logueado");
+// });
 
-  const number = "51969710219";
-  const chatId = `${number}@c.us`;
-
-  client
-    .sendMessage(
-      chatId,
-      "Hola, este es un mensaje automático desde WhatsApp Web Client"
-    )
-    .then((response) => {
-      console.log("Mensaje enviado con éxito a", chatId);
-    })
-    .catch((err) => {
-      console.error("Error enviando mensaje a", chatId, ":", err);
-    });
-});
-client.on("message", (message) => {
-  if (message.body === "hello") {
-    client.sendMessage(message.from, "Hola!");
-  }
-});
+// client.on("message", (message) => {
+//   if (message.body === "hello") {
+//     client.sendMessage(message.from, "Hola!");
+//   }
+// });
 
 client.initialize();
+
+app.set("whatsappClient", client);
+
+app.use("", router);
+
+app.listen(4000, () => {
+  console.log("Server is running on port 4000");
+});
