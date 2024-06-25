@@ -17,18 +17,18 @@ class NotificationController {
 
   async getQr(request, response) {
     try {
-      const file = path.join(
-        __dirname,
-        "..",
-        "..",
-        "public",
-        "qr_codes",
-        "whatsapp_qr.png"
-      );
+      // const file = path.join(
+      //   __dirname,
+      //   "..",
+      //   "..",
+      //   "public",
+      //   "qr_codes",
+      //   "whatsapp_qr.png"
+      // );
       response.sendFile(
         "./qr_codes/whatsapp_qr.png",
         { root: "./public" },
-        (err) => {
+        (e) => {
           return response
             .status(500)
             .json({ message: "Error in capture qrcode" });

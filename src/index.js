@@ -1,15 +1,17 @@
 import express from "express";
 import router from "./routes/notification.route.js";
 import qr from "./routes/qr.route.js";
+import rateLimit from "express-rate-limit";
 
 import qrcode from "qrcode";
-import { fileURLToPath } from "url";
 
 import fs from "fs";
 import path from "path";
 import pkg from "whatsapp-web.js";
+import helmet from "helmet";
 const { Client, LocalAuth } = pkg;
 
+import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -51,7 +53,18 @@ client.initialize();
 
 app.set("whatsappClient", client);
 
-app.use("", qr);
+app.use(helmet());
+
+const limiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minuto
+  max: 10, // Límite de 5 peticiones por ventana de tiempo por IP
+  message: "Too many requests, please try again later.",
+  headers: true, // Incluir headers RateLimit
+});
+
+// app.use(limiter);
+
+app.use("", limiter, qr);
 app.use("", router);
 
 app.listen(4000, () => {
