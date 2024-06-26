@@ -6,7 +6,7 @@ class NotificationService {
       await prisma.notificafications.create({
         data: { phone_client: number, message },
       });
-      prisma.$disconnect();
+      await prisma.$disconnect();
     } catch (error) {
       console.log(error);
       throw new Error("Error in prisma.notifications.create");
@@ -17,7 +17,7 @@ class NotificationService {
   async sendNotification(number, message, client) {
     const chatId = `51${number}@c.us`;
     await client.sendMessage(chatId, message);
-    await this.registerNotification(number, message);
+    // await this.registerNotification(number, message);
     try {
     } catch (error) {
       throw new Error("Error in send notification");

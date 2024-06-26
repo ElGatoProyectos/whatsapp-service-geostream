@@ -9,7 +9,7 @@ const prefix = "/notifications";
 
 router.post(
   prefix,
-  authMiddleware.validateAuthorization,
+  // authMiddleware.validateAuthorization,
   notificationMiddleware.validateBody,
   notificationcontroller.sendMessage
 );
