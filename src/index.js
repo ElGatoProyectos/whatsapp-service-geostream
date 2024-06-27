@@ -9,6 +9,7 @@ import fs from "fs";
 import path from "path";
 import pkg from "whatsapp-web.js";
 import helmet from "helmet";
+import cron from "node-cron";
 const { Client, LocalAuth } = pkg;
 
 import { fileURLToPath } from "url";
@@ -18,6 +19,10 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(express.json());
+
+cron.schedule("* * * * * *", async () => {
+  console.log("testeando");
+});
 
 const client = new Client({
   authStrategy: new LocalAuth({
