@@ -15,14 +15,14 @@ datasource db {
 
 model Admin {
   id        Int    @id @default(autoincrement())
+  email     String @unique
+  password  String
   full_name String
   phone     String
-  email     String
-  password  String
   logged    String @default("y")
 }
 
-model AccountToDeposit {
+model Bank {
   id     Int    @id @default(autoincrement())
   bank   String
   number String
@@ -30,8 +30,9 @@ model AccountToDeposit {
   type   String
 }
 
-model DepositToAdmin {
+model Voucher {
   id             Int      @id @default(autoincrement())
+  voucher_url    String
   voucher_number String
   value          Int
   date           DateTime
@@ -45,49 +46,51 @@ enum Role {
 }
 
 model User {
-  id               Int              @id @default(autoincrement())
-  email            String           @unique
-  ref_id           Int?             @unique
-  role             Role             @default(USER)
+  id               Int       @id @default(autoincrement())
+  email            String    @unique
+  ref_id           Int?
+  role             Role      @default(USER)
   full_name        String
-  dni              String?
+  dni              String    @unique
   phone            String
-  balance_in_cents Int              @default(0)
+  balance_in_cents Int       @default(0)
   password         String
-  enabled          String           @default("y")
+  enabled          String    @default("y")
   accounts         Account[]
-  deposits         DepositToAdmin[]
+  vouchers         Voucher[]
   orders           Order[]
-  created_at       DateTime         @default(now())
-  updated_at       DateTime         @updatedAt
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+}
+
+enum ProductState {
+  IMMEDIATE_DELIVERY // entrega inmediata
+  UPON_REQUEST // a pedido
 }
 
 model Product {
-  id                         Int       @id @default(autoincrement())
+  id                         Int          @id @default(autoincrement())
+  enable_notifications       Boolean      @default(false)
   platform_id                Int
-  platform                   Platform  @relation(fields: [platform_id], references: [id])
+  platform                   Platform     @relation(fields: [platform_id], references: [id])
   accounts                   Account[]
   price_in_cents             Int
   price_distributor_in_cents Int
-  created_at                 DateTime  @default(now())
-  updated_at                 DateTime  @updatedAt
-}
-
-enum States {
-  AVAILABLE // disponible
-  DELIVERED // entregado
-  PENDING // pendiente
+  status                     ProductState @default(IMMEDIATE_DELIVERY)
+  created_at                 DateTime     @default(now())
+  updated_at                 DateTime     @updatedAt
+  Order                      Order[]
 }
 
 model Account {
   id                 Int      @id @default(autoincrement())
-  is_active          Boolean
+  is_active          Boolean  @default(false)
   email              String
   password           String
+  description        String?
   pin                String
   numb_profiles      Int
   numb_days_duration Int
-  status             States   @default(AVAILABLE)
   platform           Platform @relation(fields: [platform_id], references: [id])
   platform_id        Int
   product            Product  @relation(fields: [product_id], references: [id])
@@ -95,13 +98,13 @@ model Account {
   user               User?    @relation(fields: [user_id], references: [id])
   user_id            Int?
   orders             Order[]
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
 }
 
 model Platform {
   id          Int       @id @default(autoincrement())
+  img_url     String
   name        String
   description String
   products    Product[] @relation()
@@ -109,11 +112,12 @@ model Platform {
 }
 
 model Order {
-  id       Int  @id @default(autoincrement())
-  ref_id   Int?
-  role     Role
-  quantity Int
-
+  id         Int      @id @default(autoincrement())
+  ref_id     Int?
+  role       Role
+  quantity   Int
+  product_id Int
+  product    Product  @relation(fields: [product_id], references: [id])
   user_id    Int
   user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   account_id Int
@@ -122,9 +126,9 @@ model Order {
   updated_at DateTime @updatedAt
 }
 
-model Notifications {
+model Notification {
   id           Int      @id @default(autoincrement())
-  phone_client String
+  phone_client Int
   message      String
   created_at   DateTime @default(now())
 }

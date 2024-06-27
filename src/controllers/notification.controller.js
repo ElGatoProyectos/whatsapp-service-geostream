@@ -1,4 +1,7 @@
+import path from "path";
 import { notificationService } from "../services/notification.service.js";
+import fs from "fs/promises";
+import { fileURLToPath } from "url";
 
 class NotificationController {
   async sendMessage(request, response) {
@@ -11,23 +14,24 @@ class NotificationController {
         .status(200)
         .json({ message: "Mensaje enviado satisfactroriamente" });
     } catch (error) {
-      return response.status(500).json({ message: "Error send message" });
+      response.status(500).json({ message: "Error send message" });
     }
   }
 
   async getQr(request, response) {
     try {
-      response.sendFile(
-        "./qr_codes/whatsapp_qr.png",
-        { root: "./public" },
-        (e) => {
-          return response
-            .status(500)
-            .json({ message: "Error in capture qrcode" });
-        }
-      );
+      // Define la ruta al archivo QR
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = path.dirname(__filename);
+      const qrCodePath = "./qr_codes/whatsapp_qr.png";
+      const imagePath = path.join(__dirname, "../..", "public", qrCodePath);
+
+      // Lee el archivo QR y lo envía como respuesta
+      await fs.readFile(imagePath);
+      response.sendFile(imagePath);
     } catch (error) {
-      return response.status(500).json({ message: "Error in capture qrcode" });
+      console.error(error);
+      response.status(500).json({ message: "Error in capture qrcode" });
     }
   }
 }

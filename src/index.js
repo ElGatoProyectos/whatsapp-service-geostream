@@ -12,6 +12,7 @@ import helmet from "helmet";
 const { Client, LocalAuth } = pkg;
 
 import { fileURLToPath } from "url";
+import { instanceCronNotifications } from "./utilities/cron.utility.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -51,15 +52,17 @@ client.on("qr", (qr) => {
 
 client.initialize();
 
+// instanceCronNotifications(client);
+
 app.set("whatsappClient", client);
 
 app.use(helmet());
 
 const limiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minuto
-  max: 10, // Límite de 5 peticiones por ventana de tiempo por IP
+  windowMs: 1 * 60 * 1000,
+  max: 10,
   message: "Too many requests, please try again later.",
-  headers: true, // Incluir headers RateLimit
+  headers: true,
 });
 
 // app.use(limiter);
