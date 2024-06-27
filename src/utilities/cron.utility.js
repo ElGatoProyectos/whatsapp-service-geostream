@@ -6,8 +6,17 @@ export async function instanceCronNotifications(client) {
   try {
     cron.schedule("0 6 * * *", async () => {
       if (client) {
-        sendNotificationDays(client);
-        sendNotificationFewAccounts(client);
+        // notificacion te quedan pocos dias
+        await sendNotificationDays(client);
+        // notificacion de que tienes pocos productos
+        await sendNotificationFewAccounts(client);
+        // notificacion de
+      }
+    });
+
+    cron.schedule("0 0 * * *", async () => {
+      if (client) {
+        await validateConsumidorDistribuidor(client);
       }
     });
   } catch (error) {
@@ -19,23 +28,26 @@ async function sendNotificationDays(client) {
   try {
     const currentDate = new Date();
 
-    // Calcular la fecha límite (hoy menos 5 días)
-    const limitDate = new Date();
-    limitDate.setDate(currentDate.getDate() - 5);
-
     // Obtener todas las cuentas
-    const accounts = await prisma.account.findMany();
+    const accounts = await prisma.account.findMany({
+      where: { is_active: true },
+    });
     await prisma.$disconnect();
 
     // Filtrar las cuentas que cumplen con la condición
     const filteredAccounts = accounts.filter((account) => {
-      const creationDate = new Date(account.created_at);
+      let creationDate;
+      if (account.renovation_date) {
+        creationDate = new Date(account.renovation_date);
+      } else {
+        creationDate = new Date(account.created_at);
+      }
       const expirationDate = new Date(creationDate);
       expirationDate.setDate(
-        creationDate.getDate() + account.numb_days_duration - 5
+        creationDate.getDate() + account.numb_days_duration - 2
       );
 
-      return expirationDate <= currentDate;
+      if (expirationDate <= currentDate) return account;
     });
 
     await Promise.all(
@@ -44,17 +56,9 @@ async function sendNotificationDays(client) {
           where: { id: account.user_id },
         });
 
-        // Calcular los días restantes
-        const daysRemaining = Math.ceil(
-          (expirationDate - currentDate) / (1000 * 60 * 60 * 24)
-        );
-
-        // Formatear los días restantes para la notificación
-        const formattedDaysRemaining = `${daysRemaining} día(s)`;
-
         await notificationService.sendNotification(
           user.phone,
-          `Te quedan ${formattedDaysRemaining} en tu cuenta`,
+          `Te queda un dia en tu cuenta de streaming 😔🥺`,
           client
         );
       })
@@ -66,15 +70,11 @@ async function sendNotificationDays(client) {
 
 async function sendNotificationFewAccounts(client) {
   try {
-    const currentDate = new Date();
-
-    const limitDate = new Date();
-    limitDate.setDate(currentDate.getDate() - 5);
-
     const accounts = await prisma.account.findMany({
-      where: { is_active: true },
+      where: { is_active: false },
     });
     const [admin] = await prisma.admin.findMany();
+
     if (accounts.length < 5) {
       await notificationService.sendNotification(
         admin.phone,
@@ -86,4 +86,34 @@ async function sendNotificationFewAccounts(client) {
   } catch (error) {
     console.log(error);
   }
+}
+
+async function validateConsumidorDistribuidor() {
+  try {
+    const users = await prisma.user.findMany();
+    await Promise.all(
+      users.map(async (user) => {
+        // obtenemos las cuentas activas que estan ahora
+        const created = new Date(user.created_at);
+
+        const dayActually = new Date().getDate() + 1;
+
+        if (dayActually > created.getDate()) {
+          if (user.role === "DISTRIBUTOR") {
+            const accountsActiveForUserSelected = await prisma.account.findMany(
+              {
+                where: { is_active: true, user_id: user.id },
+              }
+            );
+            if (accountsActiveForUserSelected < 10) {
+              await prisma.user.update({
+                where: { id: user.id },
+                data: { role: "USER" },
+              });
+            }
+          }
+        }
+      })
+    );
+  } catch (error) {}
 }

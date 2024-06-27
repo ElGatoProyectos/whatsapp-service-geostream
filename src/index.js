@@ -52,7 +52,7 @@ client.on("qr", (qr) => {
 
 client.initialize();
 
-// instanceCronNotifications(client);
+instanceCronNotifications(client);
 
 app.set("whatsappClient", client);
 

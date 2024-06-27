@@ -46,21 +46,22 @@ enum Role {
 }
 
 model User {
-  id               Int       @id @default(autoincrement())
-  email            String    @unique
+  id               Int    @id @default(autoincrement())
+  email            String @unique
   ref_id           Int?
-  role             Role      @default(USER)
+  role             Role   @default(USER)
   full_name        String
-  dni              String    @unique
+  dni              String @unique
   phone            String
-  balance_in_cents Int       @default(0)
-  password         String
-  enabled          String    @default("y")
-  accounts         Account[]
-  vouchers         Voucher[]
-  orders           Order[]
-  created_at       DateTime  @default(now())
-  updated_at       DateTime  @updatedAt
+  balance_in_cents Int    @default(0)
+
+  password   String
+  enabled    String    @default("y")
+  accounts   Account[]
+  vouchers   Voucher[]
+  orders     Order[]
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
 }
 
 enum ProductState {

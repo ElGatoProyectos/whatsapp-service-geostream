@@ -2,6 +2,7 @@ import path from "path";
 import { notificationService } from "../services/notification.service.js";
 import fs from "fs/promises";
 import { fileURLToPath } from "url";
+import { adminService } from "../services/admin.service.js";
 
 class NotificationController {
   async sendMessage(request, response) {
@@ -10,6 +11,22 @@ class NotificationController {
       const client = request.app.get("whatsappClient");
 
       await notificationService.sendNotification(phone, message, client);
+      response
+        .status(200)
+        .json({ message: "Mensaje enviado satisfactroriamente" });
+    } catch (error) {
+      response.status(500).json({ message: "Error send message" });
+    }
+  }
+
+  async BuyOnRequest(request, response) {
+    try {
+      const { message } = request.body;
+      const client = request.app.get("whatsappClient");
+
+      const adminPhone = await adminService.findPhone();
+
+      await notificationService.sendNotification(adminPhone, message, client);
       response
         .status(200)
         .json({ message: "Mensaje enviado satisfactroriamente" });

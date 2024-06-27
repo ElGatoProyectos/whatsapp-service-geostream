@@ -8,7 +8,7 @@ const prefix = "/qrcode";
 
 router.get(
   prefix,
-  // authMiddleware.validateAuthorization,
+  authMiddleware.validateAuthorizationAdmin,
   notificationcontroller.getQr
 );
 

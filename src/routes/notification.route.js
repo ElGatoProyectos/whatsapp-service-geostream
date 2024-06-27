@@ -9,9 +9,16 @@ const prefix = "/notifications";
 
 router.post(
   prefix,
-  // authMiddleware.validateAuthorization,
+  authMiddleware.validateAuthorizationUser,
   notificationMiddleware.validateBody,
   notificationcontroller.sendMessage
+);
+
+router.post(
+  prefix + "/buy-on-request",
+  authMiddleware.validateAuthorizationUser,
+  notificationMiddleware.validateBuyInRequest,
+  notificationcontroller.BuyOnRequest
 );
 
 export default router;
