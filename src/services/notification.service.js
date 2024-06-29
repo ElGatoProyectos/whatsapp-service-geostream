@@ -15,12 +15,14 @@ class NotificationService {
   }
 
   // todo validacion de autenticacion
-  async sendNotification(number, message, client) {
-    const chatId = `51${number}@c.us`;
-    await client.sendMessage(chatId, message);
-    // await this.registerNotification(number, message);
+  async sendNotification(country_code, number, message, client) {
     try {
+      const numberCode = country_code.split("+")[1];
+      const chatId = `${numberCode}${number}@c.us`;
+      await client.sendMessage(chatId, message);
+      // await this.registerNotification(number, message);
     } catch (error) {
+      console.log(error);
       throw new Error("Error in send notification");
     }
   }

@@ -20,9 +20,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(express.json());
 
-cron.schedule("* * * * * *", async () => {
-  console.log("testeando");
-});
+const wwebVersion = "2.2412.54";
 
 const client = new Client({
   authStrategy: new LocalAuth({
@@ -37,6 +35,7 @@ const client = new Client({
 
 client.on("qr", (qr) => {
   try {
+    console.log("qrrrr");
     const dir = path.join(__dirname, "..", "public", "qr_codes");
 
     if (!fs.existsSync(dir)) {
@@ -50,16 +49,22 @@ client.on("qr", (qr) => {
         console.log(err);
       }
     });
+
+    console.log("QR created");
   } catch (error) {
     console.log(error);
   }
 });
 
-client.initialize();
+client.on("ready", () => {
+  console.log("cliente ready");
+});
 
-instanceCronNotifications(client);
+client.initialize();
+console.log("inicializado");
 
 app.set("whatsappClient", client);
+instanceCronNotifications(client);
 
 app.use(helmet());
 

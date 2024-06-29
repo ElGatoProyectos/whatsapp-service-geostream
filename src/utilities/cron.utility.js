@@ -28,23 +28,33 @@ async function sendNotificationDays(client) {
   try {
     const currentDate = new Date();
 
-    // Obtener todas las cuentas
     const accounts = await prisma.account.findMany({
-      where: { is_active: true },
+      where: { status: "BOUGHT" },
     });
+
+    const platforms = await prisma.platform.findMany({});
+
+    let platformSelected;
+
     await prisma.$disconnect();
 
-    // Filtrar las cuentas que cumplen con la condición
     const filteredAccounts = accounts.filter((account) => {
       let creationDate;
-      if (account.renovation_date) {
-        creationDate = new Date(account.renovation_date);
+      if (account.renewal_date) {
+        creationDate = new Date(account.renewal_date);
       } else {
-        creationDate = new Date(account.created_at);
+        creationDate = new Date(account.purchase_date);
       }
       const expirationDate = new Date(creationDate);
+
+      const platform = platforms.find(
+        (item) => item.id === account.platform_id
+      );
+
+      platformSelected = platform;
+
       expirationDate.setDate(
-        creationDate.getDate() + account.numb_days_duration - 2
+        creationDate.getDate() + platform.days_duration - 2
       );
 
       if (expirationDate <= currentDate) return account;
@@ -57,8 +67,9 @@ async function sendNotificationDays(client) {
         });
 
         await notificationService.sendNotification(
+          user.country_code,
           user.phone,
-          `Te queda un dia en tu cuenta de streaming 😔🥺`,
+          `Te queda un dia en tu cuenta de ${platformSelected.name} 🥺`,
           client
         );
       })
@@ -71,14 +82,20 @@ async function sendNotificationDays(client) {
 async function sendNotificationFewAccounts(client) {
   try {
     const accounts = await prisma.account.findMany({
-      where: { is_active: false },
+      where: { status: "NOT_BOUGHT" },
     });
+
+    console.log(accounts);
+
     const [admin] = await prisma.admin.findMany();
 
     if (accounts.length < 5) {
       await notificationService.sendNotification(
+        admin.country_code,
         admin.phone,
-        "Te quedan menos de 5 cuentas",
+        "Hola " +
+          admin.full_name +
+          ", le quedan menos de 5 cuentas, verifique y registre nuevas cuentas 😶",
         client
       );
     }
@@ -88,32 +105,38 @@ async function sendNotificationFewAccounts(client) {
   }
 }
 
-async function validateConsumidorDistribuidor() {
+async function validateConsumidorDistribuidor(client) {
   try {
-    const users = await prisma.user.findMany();
+    const users = await prisma.user.findMany({
+      where: { role: "DISTRIBUTOR" },
+    });
     await Promise.all(
       users.map(async (user) => {
-        // obtenemos las cuentas activas que estan ahora
-        const created = new Date(user.created_at);
+        const created = new Date(user.created_at).getDate();
 
-        const dayActually = new Date().getDate() + 1;
+        const dayActually = new Date().getDate();
 
-        if (dayActually > created.getDate()) {
-          if (user.role === "DISTRIBUTOR") {
-            const accountsActiveForUserSelected = await prisma.account.findMany(
-              {
-                where: { is_active: true, user_id: user.id },
-              }
+        if (dayActually >= created) {
+          const accountsActiveForUserSelected = await prisma.account.findMany({
+            where: { status: "BOUGHT", user_id: user.id },
+          });
+          if (accountsActiveForUserSelected < 10) {
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { role: "USER" },
+            });
+
+            await notificationService.sendNotification(
+              user.country_code,
+              user.phone,
+              "Su cuenta fue cambiada a usuario CONSUMIDOR",
+              client
             );
-            if (accountsActiveForUserSelected < 10) {
-              await prisma.user.update({
-                where: { id: user.id },
-                data: { role: "USER" },
-              });
-            }
           }
         }
       })
     );
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+  }
 }

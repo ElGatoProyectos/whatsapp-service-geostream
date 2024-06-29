@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,30 +8,13 @@ datasource db {
 }
 
 model Admin {
-  id        Int    @id @default(autoincrement())
-  email     String @unique
-  password  String
-  full_name String
-  phone     String
-  logged    String @default("y")
-}
-
-model Bank {
-  id     Int    @id @default(autoincrement())
-  bank   String
-  number String
-  name   String
-  type   String
-}
-
-model Voucher {
-  id             Int      @id @default(autoincrement())
-  voucher_url    String
-  voucher_number String
-  value          Int
-  date           DateTime
-  user           User     @relation(fields: [user_id], references: [id])
-  user_id        Int
+  id           Int    @id @default(autoincrement())
+  email        String @unique
+  password     String
+  full_name    String
+  phone        String
+  country_code String
+  logged       String @default("y")
 }
 
 enum Role {
@@ -46,22 +23,48 @@ enum Role {
 }
 
 model User {
-  id               Int    @id @default(autoincrement())
-  email            String @unique
-  ref_id           Int?
-  role             Role   @default(USER)
-  full_name        String
-  dni              String @unique
-  phone            String
-  balance_in_cents Int    @default(0)
+  id           Int    @id @default(autoincrement())
+  // data in 
+  email        String @unique
+  password     String
+  ref_id       Int?
+  full_name    String
+  dni          String @unique
+  phone        String
+  country_code String
 
-  password   String
-  enabled    String    @default("y")
-  accounts   Account[]
+  balance_in_cents Int    @default(0)
+  enabled          String @default("y")
+  role             Role   @default(USER)
+
   vouchers   Voucher[]
   orders     Order[]
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
+  Account    Account[]
+}
+
+model Bank {
+  id       Int    @id @default(autoincrement())
+  bank_url String
+  bank     String
+  number   String
+  name     String
+  type     String
+}
+
+model Voucher {
+  id           Int      @id @default(autoincrement())
+  voucher_url  String
+  number       String
+  country_code String
+  value        Int
+  user         User     @relation(fields: [user_id], references: [id])
+  user_id      Int
+  date         DateTime
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 enum ProductState {
@@ -69,67 +72,71 @@ enum ProductState {
   UPON_REQUEST // a pedido
 }
 
-model Product {
-  id                         Int          @id @default(autoincrement())
-  enable_notifications       Boolean      @default(false)
-  platform_id                Int
-  platform                   Platform     @relation(fields: [platform_id], references: [id])
-  accounts                   Account[]
-  price_in_cents             Int
-  price_distributor_in_cents Int
-  status                     ProductState @default(IMMEDIATE_DELIVERY)
-  created_at                 DateTime     @default(now())
-  updated_at                 DateTime     @updatedAt
-  Order                      Order[]
+enum AccountStatus {
+  BOUGHT // comprado
+  NOT_BOUGHT // no comprado
 }
 
 model Account {
-  id                 Int      @id @default(autoincrement())
-  is_active          Boolean  @default(false)
-  email              String
-  password           String
-  description        String?
-  pin                String
-  numb_profiles      Int
-  numb_days_duration Int
-  platform           Platform @relation(fields: [platform_id], references: [id])
-  platform_id        Int
-  product            Product  @relation(fields: [product_id], references: [id])
-  product_id         Int
-  user               User?    @relation(fields: [user_id], references: [id])
-  user_id            Int?
-  orders             Order[]
-  created_at         DateTime @default(now())
-  updated_at         DateTime @updatedAt
+  id          Int           @id @default(autoincrement())
+  is_active   Boolean       @default(false)
+  // data in
+  email       String
+  password    String
+  description String?
+  pin         String
+  status      AccountStatus @default(NOT_BOUGHT)
+
+  purchase_date DateTime? // fecha compra
+  renewal_date  DateTime? // fecha renovacion
+
+  platform    Platform @relation(fields: [platform_id], references: [id])
+  platform_id Int
+  user        User?    @relation(fields: [user_id], references: [id])
+  user_id     Int?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+enum PlatformState {
+  IMMEDIATE_DELIVERY // entrega inmediata
+  UPON_REQUEST // a pedido
 }
 
 model Platform {
-  id          Int       @id @default(autoincrement())
-  img_url     String
-  name        String
-  description String
-  products    Product[] @relation()
-  account     Account[]
+  id                         Int           @id @default(autoincrement())
+  img_url                    String?
+  name                       String
+  description                String
+  days_duration              Int
+  price_in_cents             Int
+  price_distributor_in_cents Int
+  status                     PlatformState @default(IMMEDIATE_DELIVERY)
+  Order                      Order[]
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  Account    Account[]
 }
 
 model Order {
-  id         Int      @id @default(autoincrement())
-  ref_id     Int?
-  role       Role
-  quantity   Int
-  product_id Int
-  product    Product  @relation(fields: [product_id], references: [id])
-  user_id    Int
-  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  account_id Int
-  account    Account  @relation(fields: [account_id], references: [id], onDelete: Restrict)
+  id          Int      @id @default(autoincrement())
+  //data in
+  ref_id      Int?
+  role        Role
+  platform    Platform @relation(fields: [platform_id], references: [id])
+  platform_id Int
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id     Int
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
 
 model Notification {
   id           Int      @id @default(autoincrement())
-  phone_client Int
+  phone_client String
   message      String
   created_at   DateTime @default(now())
 }

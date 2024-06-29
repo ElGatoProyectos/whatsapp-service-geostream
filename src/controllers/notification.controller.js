@@ -7,10 +7,15 @@ import { adminService } from "../services/admin.service.js";
 class NotificationController {
   async sendMessage(request, response) {
     try {
-      const { message, phone } = request.body;
+      const { country_code, message, phone } = request.body;
       const client = request.app.get("whatsappClient");
 
-      await notificationService.sendNotification(phone, message, client);
+      await notificationService.sendNotification(
+        country_code,
+        phone,
+        message,
+        client
+      );
       response
         .status(200)
         .json({ message: "Mensaje enviado satisfactroriamente" });
@@ -24,9 +29,14 @@ class NotificationController {
       const { message } = request.body;
       const client = request.app.get("whatsappClient");
 
-      const adminPhone = await adminService.findPhone();
+      const admin = await adminService.findPhone();
 
-      await notificationService.sendNotification(adminPhone, message, client);
+      await notificationService.sendNotification(
+        admin.country_code,
+        admin.phone,
+        message,
+        client
+      );
       response
         .status(200)
         .json({ message: "Mensaje enviado satisfactroriamente" });
