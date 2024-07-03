@@ -37,21 +37,13 @@ class AuthMiddleware {
   async validateAuthorizationAdmin(request, response, nextFunction) {
     try {
       const token = request.get("Authorization");
-
-      const responseToken = jwt.verify(
-        token,
-        process.env.TOKEN_SECRET_VALIDATION_NOTIFICATION || ""
-      );
-
-      const { userSession, codeValidation } = responseToken;
-
-      const [admin] = await prisma.admin.findMany();
-
-      if (admin) nextFunction();
-
-      response
-        .status(401)
-        .json({ message: "Error in validating authorization" });
+      if (token) {
+        nextFunction();
+      } else {
+        response
+          .status(401)
+          .json({ message: "Error in validating authorization" });
+      }
     } catch (error) {
       response
         .status(401)
