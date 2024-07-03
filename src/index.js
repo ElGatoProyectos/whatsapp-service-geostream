@@ -27,6 +27,9 @@ const client = new Client({
   authStrategy: new LocalAuth({
     dataPath: "sessions",
   }),
+  puppeteer: {
+    args: ["--no-sandbox", "--disable-setuid-sandbox"], // Desactiva el sandbox
+  },
   webVersionCache: {
     type: "remote",
     remotePath:
