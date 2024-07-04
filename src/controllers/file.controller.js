@@ -39,6 +39,7 @@ const upload = multer({ storage: storage });
 
 class FileController {
   async registerImageProfile(request, response) {
+    console.log("wtf");
     upload.single("image")(request, response, (err) => {
       if (err) {
         return response.status(500).json({ error: err.message });
@@ -50,6 +51,7 @@ class FileController {
     });
   }
   async registerImageProfileAdmin(request, response) {
+    console.log("---->");
     upload.single("image-admin")(request, response, (err) => {
       if (err) {
         return response.status(500).json({ error: err.message });

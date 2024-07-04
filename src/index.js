@@ -82,7 +82,7 @@ const limiter = rateLimit({
 
 // app.use(limiter);
 
-app.use("", limiter, qr);
+app.use("", qr);
 app.use("", router);
 app.use("", fileRouter);
 
