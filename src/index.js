@@ -9,7 +9,7 @@ import fs from "fs";
 import path from "path";
 import pkg from "whatsapp-web.js";
 import helmet from "helmet";
-import cron from "node-cron";
+import cors from "cors";
 const { Client, LocalAuth } = pkg;
 
 import { fileURLToPath } from "url";
@@ -20,6 +20,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 const wwebVersion = "2.2412.54";
 
@@ -27,6 +28,9 @@ const client = new Client({
   authStrategy: new LocalAuth({
     dataPath: "sessions",
   }),
+  puppeteer: {
+    args: ["--no-sandbox", "--disable-setuid-sandbox"], // Desactiva el sandbox
+  },
   webVersionCache: {
     type: "remote",
     remotePath:

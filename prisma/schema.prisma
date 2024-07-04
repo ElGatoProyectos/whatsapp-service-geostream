@@ -1,3 +1,9 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,13 +14,14 @@ datasource db {
 }
 
 model Admin {
-  id           Int    @id @default(autoincrement())
-  email        String @unique
+  id           Int     @id @default(autoincrement())
+  email        String  @unique
+  avatar_url   String?
   password     String
   full_name    String
   phone        String
   country_code String
-  logged       String @default("y")
+  logged       String  @default("y")
 }
 
 enum Role {
@@ -23,13 +30,14 @@ enum Role {
 }
 
 model User {
-  id           Int    @id @default(autoincrement())
-  // data in 
-  email        String @unique
+  id           Int     @id @default(autoincrement())
+  // data in
+  avatar_url   String?
+  email        String  @unique
   password     String
   ref_id       Int?
   full_name    String
-  dni          String @unique
+  dni          String  @unique
   phone        String
   country_code String
 
@@ -45,23 +53,28 @@ model User {
 }
 
 model Bank {
-  id       Int    @id @default(autoincrement())
-  bank_url String
+  id       Int     @id @default(autoincrement())
+  bank_url String?
   bank     String
   number   String
   name     String
   type     String
 }
 
+enum VoucherStatus {
+  READ
+  UNREAD
+}
+
 model Voucher {
-  id           Int      @id @default(autoincrement())
-  voucher_url  String
-  number       String
-  country_code String
-  value        Int
-  user         User     @relation(fields: [user_id], references: [id])
-  user_id      Int
-  date         DateTime
+  id          Int           @id @default(autoincrement())
+  voucher_url String?
+  number      String
+  value       Int
+  user        User          @relation(fields: [user_id], references: [id])
+  user_id     Int
+  date        DateTime
+  status      VoucherStatus @default(UNREAD)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -78,14 +91,15 @@ enum AccountStatus {
 }
 
 model Account {
-  id          Int           @id @default(autoincrement())
-  is_active   Boolean       @default(false)
+  id              Int           @id @default(autoincrement())
+  is_active       Boolean       @default(false)
   // data in
-  email       String
-  password    String
-  description String?
-  pin         String
-  status      AccountStatus @default(NOT_BOUGHT)
+  email           String
+  password        String
+  description     String?
+  pin             String
+  status          AccountStatus @default(NOT_BOUGHT)
+  number_profiles Int?
 
   purchase_date DateTime? // fecha compra
   renewal_date  DateTime? // fecha renovacion
@@ -120,15 +134,21 @@ model Platform {
   Account    Account[]
 }
 
+enum StatusOrder {
+  PENDING
+  ATTENDED
+}
+
 model Order {
-  id          Int      @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   //data in
   ref_id      Int?
   role        Role
-  platform    Platform @relation(fields: [platform_id], references: [id])
+  platform    Platform    @relation(fields: [platform_id], references: [id])
   platform_id Int
-  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id     Int
+  status      StatusOrder @default(ATTENDED)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
