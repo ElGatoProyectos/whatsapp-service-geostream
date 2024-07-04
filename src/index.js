@@ -14,6 +14,7 @@ const { Client, LocalAuth } = pkg;
 
 import { fileURLToPath } from "url";
 import { instanceCronNotifications } from "./utilities/cron.utility.js";
+import fileRouter from "./routes/file.route.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -79,6 +80,7 @@ const limiter = rateLimit({
 
 app.use("", limiter, qr);
 app.use("", router);
+app.use("", fileRouter);
 
 app.listen(4000, () => {
   console.log("Server is running on port 4000");
