@@ -69,6 +69,8 @@ client.initialize();
 console.log("inicializado");
 
 app.set("whatsappClient", client);
+
+// instance cron
 instanceCronNotifications(client);
 
 app.use(helmet());
@@ -84,7 +86,7 @@ const limiter = rateLimit({
 
 app.use("", limiter, qr);
 app.use("", router);
-app.use("", fileRouter);
+// app.use("", fileRouter);
 
 app.listen(4000, () => {
   console.log("Server is running on port 4000");

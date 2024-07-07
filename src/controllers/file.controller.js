@@ -103,12 +103,10 @@ class FileController {
 
   async getVoucher(request, response) {
     try {
-      // Define la ruta al archivo QR
       const id = request.params.id;
       const qrCodePath = `./vouchers/voucher_${id}.png`;
       const imagePath = path.join(__dirname, "../..", "public", qrCodePath);
 
-      // Lee el archivo QR y lo envía como respuesta
       await fs.readFile(imagePath);
       response.sendFile(imagePath);
     } catch (error) {

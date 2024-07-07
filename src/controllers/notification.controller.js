@@ -24,26 +24,26 @@ class NotificationController {
     }
   }
 
-  async BuyOnRequest(request, response) {
-    try {
-      const { message } = request.body;
-      const client = request.app.get("whatsappClient");
+  // async BuyOnRequest(request, response) {
+  //   try {
+  //     const { message } = request.body;
+  //     const client = request.app.get("whatsappClient");
 
-      const admin = await adminService.findPhone();
+  //     const admin = await adminService.findPhone();
 
-      await notificationService.sendNotification(
-        admin.country_code,
-        admin.phone,
-        message,
-        client
-      );
-      response
-        .status(200)
-        .json({ message: "Mensaje enviado satisfactroriamente" });
-    } catch (error) {
-      response.status(500).json({ message: "Error send message" });
-    }
-  }
+  //     await notificationService.sendNotification(
+  //       admin.country_code,
+  //       admin.phone,
+  //       message,
+  //       client
+  //     );
+  //     response
+  //       .status(200)
+  //       .json({ message: "Mensaje enviado satisfactroriamente" });
+  //   } catch (error) {
+  //     response.status(500).json({ message: "Error send message" });
+  //   }
+  // }
 
   async getQr(request, response) {
     try {

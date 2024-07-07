@@ -1,6 +1,8 @@
 import cron from "node-cron";
 import prisma from "../prisma.js";
 import { notificationService } from "../services/notification.service.js";
+import { base_api_front } from "../api.js";
+import axios from "axios";
 
 export async function instanceCronNotifications(client) {
   try {
@@ -24,41 +26,12 @@ export async function instanceCronNotifications(client) {
   }
 }
 
+//todo ok
 async function sendNotificationDays(client) {
   try {
-    const currentDate = new Date();
-
-    const accounts = await prisma.account.findMany({
-      where: { status: "BOUGHT" },
-    });
-
-    const platforms = await prisma.platform.findMany({});
-
-    let platformSelected;
-
-    await prisma.$disconnect();
-
-    const filteredAccounts = accounts.filter((account) => {
-      let creationDate;
-      if (account.renewal_date) {
-        creationDate = new Date(account.renewal_date);
-      } else {
-        creationDate = new Date(account.purchase_date);
-      }
-      const expirationDate = new Date(creationDate);
-
-      const platform = platforms.find(
-        (item) => item.id === account.platform_id
-      );
-
-      platformSelected = platform;
-
-      expirationDate.setDate(
-        creationDate.getDate() + platform.days_duration - 2
-      );
-
-      if (expirationDate <= currentDate) return account;
-    });
+    const filteredAccounts = await axios.get(
+      `${base_api_front}/api/notification/not-1`
+    );
 
     await Promise.all(
       filteredAccounts.map(async (account) => {
@@ -79,15 +52,15 @@ async function sendNotificationDays(client) {
   }
 }
 
+//todo ok
 async function sendNotificationFewAccounts(client) {
   try {
-    const accounts = await prisma.account.findMany({
-      where: { status: "NOT_BOUGHT" },
-    });
+    const response = await axios.get(
+      `${base_api_front}/api/notification/not-2`
+    );
+    const accounts = response.accounts;
 
-    console.log(accounts);
-
-    const [admin] = await prisma.admin.findMany();
+    const admin = response.admin;
 
     if (accounts.length < 5) {
       await notificationService.sendNotification(
@@ -99,7 +72,6 @@ async function sendNotificationFewAccounts(client) {
         client
       );
     }
-    await prisma.$disconnect();
   } catch (error) {
     console.log(error);
   }
@@ -107,9 +79,12 @@ async function sendNotificationFewAccounts(client) {
 
 async function validateConsumidorDistribuidor(client) {
   try {
-    const users = await prisma.user.findMany({
-      where: { role: "DISTRIBUTOR" },
-    });
+    const response = await axios.get(
+      `${base_api_front}/api/notification/not-3`
+    );
+
+    const users = response.users;
+    const accountsActive = response.accountsActive;
     await Promise.all(
       users.map(async (user) => {
         const created = new Date(user.created_at).getDate();
@@ -117,13 +92,13 @@ async function validateConsumidorDistribuidor(client) {
         const dayActually = new Date().getDate();
 
         if (dayActually >= created) {
-          const accountsActiveForUserSelected = await prisma.account.findMany({
-            where: { status: "BOUGHT", user_id: user.id },
-          });
+          const accountsActiveForUserSelected = accountsActive.filter(
+            (item) => (item.user_id = user.id)
+          );
           if (accountsActiveForUserSelected < 10) {
-            await prisma.user.update({
-              where: { id: user.id },
-              data: { role: "USER" },
+            await axios.put(`${base_api}/api/user/${user.id}`, {
+              role: "USER",
+              enabled: "y",
             });
 
             await notificationService.sendNotification(
