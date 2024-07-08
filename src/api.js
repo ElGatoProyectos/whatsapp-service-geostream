@@ -1,4 +1,4 @@
-const dev = true;
+const dev = false;
 
 export const base_api_front = dev
   ? "http://localhost:3000"
