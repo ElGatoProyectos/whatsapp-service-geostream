@@ -1,5 +1,4 @@
 import cron from "node-cron";
-import prisma from "../prisma.js";
 import { notificationService } from "../services/notification.service.js";
 import { base_api_front } from "../api.js";
 import axios from "axios";

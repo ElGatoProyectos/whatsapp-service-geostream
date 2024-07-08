@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import prisma from "../prisma.js";
 import "dotenv/config";
 
 class AuthMiddleware {
