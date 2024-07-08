@@ -16,10 +16,10 @@ router.get(
 router.get("/test-api", async (req, res) => {
   try {
     const response = await axios.get("http://161.132.37.105:3000/api/admin");
-    res.status(200).json(response);
+    res.status(200).json(response.data); // Enviar solo los datos de la respuesta
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error });
+    res.status(500).json({ error: error.message });
   }
 });
 
