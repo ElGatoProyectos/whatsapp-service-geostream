@@ -13,7 +13,7 @@ router.get(
   notificationcontroller.getQr
 );
 
-router.get("test-api", async (req, res) => {
+router.get("/test-api", async (req, res) => {
   try {
     const response = await axios.get("http://161.132.37.105:3000/api/admins");
     console.log(response);
