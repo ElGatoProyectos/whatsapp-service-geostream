@@ -69,6 +69,8 @@ client.initialize();
 console.log("inicializado");
 
 app.set("whatsappClient", client);
+
+// instance cron
 instanceCronNotifications(client);
 
 app.use(helmet());

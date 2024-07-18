@@ -14,11 +14,11 @@ router.post(
   notificationcontroller.sendMessage
 );
 
-router.post(
-  prefix + "/buy-on-request",
-  // authMiddleware.validateAuthorizationUser,
-  notificationMiddleware.validateBuyInRequest,
-  notificationcontroller.BuyOnRequest
-);
+// router.post(
+//   prefix + "/buy-on-request",
+//   // authMiddleware.validateAuthorizationUser,
+//   notificationMiddleware.validateBuyInRequest,
+//   notificationcontroller.BuyOnRequest
+// );
 
 export default router;

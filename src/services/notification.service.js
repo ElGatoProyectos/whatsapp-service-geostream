@@ -1,5 +1,3 @@
-import prisma from "../prisma.js";
-
 class NotificationService {
   async registerNotification(number, message) {
     try {
