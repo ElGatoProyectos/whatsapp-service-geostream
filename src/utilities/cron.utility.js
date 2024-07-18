@@ -9,8 +9,10 @@ export async function instanceCronNotifications(client) {
       if (client) {
         // notificacion te quedan pocos dias
         await sendNotificationDays(client);
+
         // notificacion de que tienes pocos productos
         await sendNotificationFewAccounts(client);
+
         // notificacion de
       }
     });
@@ -28,7 +30,7 @@ export async function instanceCronNotifications(client) {
 //todo ok
 async function sendNotificationDays(client) {
   try {
-    const filteredAccounts = await axios.get(
+    const { data: filteredAccounts } = await axios.get(
       `${base_api_front}/api/notification/not-1`
     );
 
@@ -54,7 +56,7 @@ async function sendNotificationDays(client) {
 //todo ok
 async function sendNotificationFewAccounts(client) {
   try {
-    const response = await axios.get(
+    const { data: response } = await axios.get(
       `${base_api_front}/api/notification/not-2`
     );
     const accounts = response.accounts;
@@ -78,7 +80,7 @@ async function sendNotificationFewAccounts(client) {
 
 async function validateConsumidorDistribuidor(client) {
   try {
-    const response = await axios.get(
+    const { data: response } = await axios.get(
       `${base_api_front}/api/notification/not-3`
     );
 
