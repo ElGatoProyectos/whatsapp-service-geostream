@@ -36,14 +36,13 @@ async function sendNotificationDays(client) {
 
     await Promise.all(
       filteredAccounts.map(async (account) => {
-        const user = await prisma.user.findFirst({
-          where: { id: account.user_id },
-        });
+        const user = account.user;
+        const platform  = account.platform;
 
         await notificationService.sendNotification(
           user.country_code,
           user.phone,
-          `Te queda un dia en tu cuenta de ${platformSelected.name} 🥺`,
+          `Te queda un dia en tu cuenta de ${platform.name} 🥺`,
           client
         );
       })
