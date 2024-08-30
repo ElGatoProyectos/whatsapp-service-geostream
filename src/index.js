@@ -32,7 +32,9 @@ const client = new Client({
     args: ["--no-sandbox", "--disable-setuid-sandbox"], // Desactiva el sandbox
   },
   webVersionCache: {
-    type: "remote",
+    // type: "remote",
+    headless: true,
+    executablePath: '/usr/bin/chromium-browser',
     remotePath:
       "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html",
   },
